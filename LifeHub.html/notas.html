@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeHub - Notas</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",sans-serif;
+}
+
+body{
+    background:#eef2ff;
+    display:flex;
+    min-height:100vh;
+    transition:.3s;
+}
+
+.menu{
+    width:250px;
+    height:100vh;
+    background:#4F46E5;
+    padding:25px;
+    color:white;
+    position:fixed;
+}
+
+.menu h1{
+    margin-bottom:40px;
+    font-size:28px;
+}
+
+.menu a{
+    display:block;
+    color:white;
+    text-decoration:none;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:10px;
+    transition:.3s;
+}
+
+.menu a:hover{
+    background:white;
+    color:#4F46E5;
+}
+
+.menu a.activo{
+    background:white;
+    color:#4F46E5;
+    font-weight:bold;
+}
+
+.contenido{
+    margin-left:270px;
+    padding:40px;
+    width:100%;
+}
+
+.tarjeta{
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,.1);
+    max-width:700px;
+}
+
+h2{
+    margin-bottom:20px;
+}
+
+#botonModo{
+    margin-bottom:20px;
+    padding:12px 18px;
+    border:none;
+    border-radius:10px;
+    background:#374151;
+    color:white;
+    cursor:pointer;
+    transition:.3s;
+}
+
+#botonModo:hover{
+    transform:scale(1.03);
+}
+
+.fila-entrada{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+input, textarea{
+    flex:1;
+    min-width:200px;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:15px;
+    font-family:inherit;
+}
+
+textarea{
+    width:100%;
+    min-height:80px;
+    resize:vertical;
+}
+
+button{
+    padding:12px 20px;
+    background:#4F46E5;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:15px;
+    transition:.2s;
+}
+
+button:hover{
+    background:#372fd3;
+}
+
+.grid-notas{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+    gap:15px;
+}
+
+.nota{
+    background:#FFF9DB;
+    border-radius:12px;
+    padding:15px;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.nota h4{
+    margin-bottom:8px;
+    word-break:break-word;
+}
+
+.nota p{
+    font-size:14px;
+    white-space:pre-wrap;
+    word-break:break-word;
+    flex:1;
+    margin-bottom:10px;
+}
+
+.nota .eliminar{
+    align-self:flex-end;
+    background:#EF4444;
+    padding:6px 12px;
+    font-size:13px;
+}
+
+.nota .eliminar:hover{
+    background:#dc2626;
+}
+
+.vacio{
+    text-align:center;
+    color:#888;
+    padding:20px 0;
+    grid-column:1 / -1;
+}
+
+/* ==========================
+   MODO OSCURO
+========================== */
+
+body.modoOscuro{
+    background:#121212;
+    color:white;
+}
+
+body.modoOscuro .tarjeta{
+    background:#1E1E1E;
+    color:white;
+}
+
+body.modoOscuro .menu{
+    background:#181818;
+}
+
+body.modoOscuro input,
+body.modoOscuro textarea{
+    background:#2A2A2A;
+    color:white;
+    border:1px solid #555;
+}
+
+body.modoOscuro .nota{
+    background:#3a331a;
+}
+
+body.modoOscuro .vacio{
+    color:#aaa;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="menu">
+
+    <h1>🌟 LifeHub</h1>
+
+    <a href="index.html">🏠 Inicio</a>
+    <a href="index.html">✅ Mis tareas</a>
+    <a href="calendario.html">📅 Calendario</a>
+    <a href="notas.html" class="activo">📝 Notas</a>
+    <a href="metas.html">🎯 Metas</a>
+    <a href="configuracion.html">⚙ Configuración</a>
+
+</div>
+
+<div class="contenido">
+
+    <div class="tarjeta">
+
+        <h2>Notas</h2>
+
+        <button id="botonModo" onclick="cambiarModo()">🌙 Modo oscuro</button>
+
+        <div class="fila-entrada">
+            <input type="text" id="tituloNota" placeholder="Título de la nota">
+        </div>
+
+        <div class="fila-entrada">
+            <textarea id="contenidoNota" placeholder="Escribe tu nota aquí..."></textarea>
+        </div>
+
+        <div class="fila-entrada">
+            <button onclick="agregarNota()">Guardar nota</button>
+        </div>
+
+        <div class="grid-notas" id="listaNotas"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+window.addEventListener("load", function(){
+
+    let modo = localStorage.getItem("modo");
+    if(modo === "oscuro"){
+        document.body.classList.add("modoOscuro");
+        document.getElementById("botonModo").innerHTML = "☀️ Modo claro";
+    }
+
+    cargarNotas();
+
+});
+
+function cambiarModo(){
+
+    document.body.classList.toggle("modoOscuro");
+
+    if(document.body.classList.contains("modoOscuro")){
+        localStorage.setItem("modo","oscuro");
+        document.getElementById("botonModo").innerHTML = "☀️ Modo claro";
+    }else{
+        localStorage.setItem("modo","claro");
+        document.getElementById("botonModo").innerHTML = "🌙 Modo oscuro";
+    }
+
+}
+
+function obtenerNotas(){
+    return JSON.parse(localStorage.getItem("notas")) || [];
+}
+
+function guardarNotas(notas){
+    localStorage.setItem("notas", JSON.stringify(notas));
+}
+
+function agregarNota(){
+
+    let campoTitulo = document.getElementById("tituloNota");
+    let campoContenido = document.getElementById("contenidoNota");
+
+    let titulo = campoTitulo.value.trim();
+    let contenido = campoContenido.value.trim();
+
+    if(titulo === "" && contenido === ""){
+        alert("Escribe algo para guardar la nota");
+        return;
+    }
+
+    let notas = obtenerNotas();
+
+    notas.push({ titulo: titulo || "Sin título", contenido: contenido });
+
+    guardarNotas(notas);
+
+    campoTitulo.value = "";
+    campoContenido.value = "";
+
+    cargarNotas();
+
+}
+
+function eliminarNota(indice){
+
+    let notas = obtenerNotas();
+
+    notas.splice(indice, 1);
+
+    guardarNotas(notas);
+
+    cargarNotas();
+
+}
+
+function cargarNotas(){
+
+    let lista = document.getElementById("listaNotas");
+    lista.innerHTML = "";
+
+    let notas = obtenerNotas();
+
+    if(notas.length === 0){
+        lista.innerHTML = '<p class="vacio">No tienes notas todavía 📝</p>';
+        return;
+    }
+
+    notas.forEach(function(nota, indice){
+
+        let elemento = document.createElement("div");
+        elemento.classList.add("nota");
+
+        elemento.innerHTML = `
+            <h4>${nota.titulo}</h4>
+            <p>${nota.contenido}</p>
+            <button class="eliminar" onclick="eliminarNota(${indice})">🗑 Eliminar</button>
+        `;
+
+        lista.appendChild(elemento);
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>

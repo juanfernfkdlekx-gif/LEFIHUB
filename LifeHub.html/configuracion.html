@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeHub - Configuración</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",sans-serif;
+}
+
+body{
+    background:#eef2ff;
+    display:flex;
+    min-height:100vh;
+    transition:.3s;
+}
+
+.menu{
+    width:250px;
+    height:100vh;
+    background:#4F46E5;
+    padding:25px;
+    color:white;
+    position:fixed;
+}
+
+.menu h1{
+    margin-bottom:40px;
+    font-size:28px;
+}
+
+.menu a{
+    display:block;
+    color:white;
+    text-decoration:none;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:10px;
+    transition:.3s;
+}
+
+.menu a:hover{
+    background:white;
+    color:#4F46E5;
+}
+
+.menu a.activo{
+    background:white;
+    color:#4F46E5;
+    font-weight:bold;
+}
+
+.contenido{
+    margin-left:270px;
+    padding:40px;
+    width:100%;
+}
+
+.tarjeta{
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,.1);
+    max-width:600px;
+}
+
+h2{
+    margin-bottom:20px;
+}
+
+.opcion{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 0;
+    border-bottom:1px solid #eee;
+}
+
+.opcion:last-of-type{
+    border-bottom:none;
+}
+
+.opcion h4{
+    margin-bottom:4px;
+}
+
+.opcion p{
+    font-size:13px;
+    color:#888;
+}
+
+button{
+    padding:12px 20px;
+    background:#4F46E5;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:15px;
+    transition:.2s;
+}
+
+button:hover{
+    background:#372fd3;
+}
+
+.peligro{
+    background:#EF4444;
+}
+
+.peligro:hover{
+    background:#dc2626;
+}
+
+/* Interruptor tipo switch */
+.switch{
+    position:relative;
+    display:inline-block;
+    width:50px;
+    height:26px;
+}
+
+.switch input{
+    opacity:0;
+    width:0;
+    height:0;
+}
+
+.slider{
+    position:absolute;
+    cursor:pointer;
+    top:0; left:0; right:0; bottom:0;
+    background-color:#ccc;
+    border-radius:26px;
+    transition:.3s;
+}
+
+.slider:before{
+    position:absolute;
+    content:"";
+    height:20px;
+    width:20px;
+    left:3px;
+    bottom:3px;
+    background-color:white;
+    border-radius:50%;
+    transition:.3s;
+}
+
+input:checked + .slider{
+    background-color:#4F46E5;
+}
+
+input:checked + .slider:before{
+    transform:translateX(24px);
+}
+
+/* ==========================
+   MODO OSCURO
+========================== */
+
+body.modoOscuro{
+    background:#121212;
+    color:white;
+}
+
+body.modoOscuro .tarjeta{
+    background:#1E1E1E;
+    color:white;
+}
+
+body.modoOscuro .menu{
+    background:#181818;
+}
+
+body.modoOscuro .opcion{
+    border-bottom:1px solid #333;
+}
+
+body.modoOscuro .opcion p{
+    color:#aaa;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="menu">
+
+    <h1>🌟 LifeHub</h1>
+
+    <a href="index.html">🏠 Inicio</a>
+    <a href="index.html">✅ Mis tareas</a>
+    <a href="calendario.html">📅 Calendario</a>
+    <a href="notas.html">📝 Notas</a>
+    <a href="metas.html">🎯 Metas</a>
+    <a href="configuracion.html" class="activo">⚙ Configuración</a>
+
+</div>
+
+<div class="contenido">
+
+    <div class="tarjeta">
+
+        <h2>Configuración</h2>
+
+        <div class="opcion">
+            <div>
+                <h4>Modo oscuro</h4>
+                <p>Cambia la apariencia de toda la aplicación</p>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="interruptorModo" onchange="cambiarModo()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="opcion">
+            <div>
+                <h4>Borrar tareas guardadas</h4>
+                <p>Elimina todas las tareas de "Mis tareas"</p>
+            </div>
+            <button class="peligro" onclick="borrarDatos('tareas')">Borrar</button>
+        </div>
+
+        <div class="opcion">
+            <div>
+                <h4>Borrar notas guardadas</h4>
+                <p>Elimina todas las notas</p>
+            </div>
+            <button class="peligro" onclick="borrarDatos('notas')">Borrar</button>
+        </div>
+
+        <div class="opcion">
+            <div>
+                <h4>Borrar metas guardadas</h4>
+                <p>Elimina todas las metas</p>
+            </div>
+            <button class="peligro" onclick="borrarDatos('metas')">Borrar</button>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+window.addEventListener("load", function(){
+
+    let modo = localStorage.getItem("modo");
+
+    if(modo === "oscuro"){
+        document.body.classList.add("modoOscuro");
+        document.getElementById("interruptorModo").checked = true;
+    }
+
+});
+
+function cambiarModo(){
+
+    document.body.classList.toggle("modoOscuro");
+
+    if(document.body.classList.contains("modoOscuro")){
+        localStorage.setItem("modo","oscuro");
+    }else{
+        localStorage.setItem("modo","claro");
+    }
+
+}
+
+function borrarDatos(clave){
+
+    let confirmar = confirm("¿Seguro que quieres borrar todos los datos de '" + clave + "'? Esta acción no se puede deshacer.");
+
+    if(confirmar){
+        localStorage.removeItem(clave);
+        alert("Datos de '" + clave + "' borrados correctamente.");
+    }
+
+}
+
+</script>
+
+</body>
+</html>

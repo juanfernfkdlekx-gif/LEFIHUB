@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeHub - Calendario</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",sans-serif;
+}
+
+body{
+    background:#eef2ff;
+    display:flex;
+    min-height:100vh;
+    transition:.3s;
+}
+
+.menu{
+    width:250px;
+    height:100vh;
+    background:#4F46E5;
+    padding:25px;
+    color:white;
+    position:fixed;
+}
+
+.menu h1{
+    margin-bottom:40px;
+    font-size:28px;
+}
+
+.menu a{
+    display:block;
+    color:white;
+    text-decoration:none;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:10px;
+    transition:.3s;
+}
+
+.menu a:hover{
+    background:white;
+    color:#4F46E5;
+}
+
+.menu a.activo{
+    background:white;
+    color:#4F46E5;
+    font-weight:bold;
+}
+
+.contenido{
+    margin-left:270px;
+    padding:40px;
+    width:100%;
+}
+
+.tarjeta{
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,.1);
+    max-width:700px;
+}
+
+h2{
+    margin-bottom:20px;
+}
+
+#botonModo{
+    margin-bottom:20px;
+    padding:12px 18px;
+    border:none;
+    border-radius:10px;
+    background:#374151;
+    color:white;
+    cursor:pointer;
+    transition:.3s;
+}
+
+#botonModo:hover{
+    transform:scale(1.03);
+}
+
+.calendario-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.calendario-header button{
+    padding:10px 15px;
+    background:#4F46E5;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.calendario-header button:hover{
+    background:#372fd3;
+}
+
+.calendario-header h3{
+    text-transform:capitalize;
+}
+
+.grid-dias{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+    margin-bottom:10px;
+}
+
+.grid-dias span{
+    text-align:center;
+    font-weight:bold;
+    font-size:13px;
+    color:#666;
+}
+
+.grid-fechas{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+}
+
+.dia{
+    aspect-ratio:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    background:#f8f8f8;
+    font-size:14px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.dia:hover{
+    background:#e0e0ff;
+}
+
+.dia.vacio{
+    background:transparent;
+    cursor:default;
+}
+
+.dia.hoy{
+    background:#4F46E5;
+    color:white;
+    font-weight:bold;
+}
+
+/* ==========================
+   MODO OSCURO
+========================== */
+
+body.modoOscuro{
+    background:#121212;
+    color:white;
+}
+
+body.modoOscuro .tarjeta{
+    background:#1E1E1E;
+    color:white;
+}
+
+body.modoOscuro .menu{
+    background:#181818;
+}
+
+body.modoOscuro .dia{
+    background:#2A2A2A;
+    color:white;
+}
+
+body.modoOscuro .dia:hover{
+    background:#3a3a55;
+}
+
+body.modoOscuro .grid-dias span{
+    color:#aaa;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="menu">
+
+    <h1>🌟 LifeHub</h1>
+
+    <a href="index.html">🏠 Inicio</a>
+    <a href="index.html">✅ Mis tareas</a>
+    <a href="calendario.html" class="activo">📅 Calendario</a>
+    <a href="notas.html">📝 Notas</a>
+    <a href="metas.html">🎯 Metas</a>
+    <a href="configuracion.html">⚙ Configuración</a>
+
+</div>
+
+<div class="contenido">
+
+    <div class="tarjeta">
+
+        <h2>Calendario</h2>
+
+        <button id="botonModo" onclick="cambiarModo()">🌙 Modo oscuro</button>
+
+        <div class="calendario-header">
+            <button onclick="cambiarMes(-1)">←</button>
+            <h3 id="tituloMes"></h3>
+            <button onclick="cambiarMes(1)">→</button>
+        </div>
+
+        <div class="grid-dias">
+            <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+        </div>
+
+        <div class="grid-fechas" id="gridFechas"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+window.addEventListener("load", function(){
+
+    let modo = localStorage.getItem("modo");
+    if(modo === "oscuro"){
+        document.body.classList.add("modoOscuro");
+        document.getElementById("botonModo").innerHTML = "☀️ Modo claro";
+    }
+
+    generarCalendario();
+
+});
+
+function cambiarModo(){
+
+    document.body.classList.toggle("modoOscuro");
+
+    if(document.body.classList.contains("modoOscuro")){
+        localStorage.setItem("modo","oscuro");
+        document.getElementById("botonModo").innerHTML = "☀️ Modo claro";
+    }else{
+        localStorage.setItem("modo","claro");
+        document.getElementById("botonModo").innerHTML = "🌙 Modo oscuro";
+    }
+
+}
+
+let fechaActual = new Date();
+
+function cambiarMes(direccion){
+    fechaActual.setMonth(fechaActual.getMonth() + direccion);
+    generarCalendario();
+}
+
+function generarCalendario(){
+
+    let hoy = new Date();
+    let anio = fechaActual.getFullYear();
+    let mes = fechaActual.getMonth();
+
+    let nombresMeses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+    document.getElementById("tituloMes").textContent = nombresMeses[mes] + " " + anio;
+
+    let primerDia = new Date(anio, mes, 1).getDay();
+    let diasEnMes = new Date(anio, mes + 1, 0).getDate();
+
+    let grid = document.getElementById("gridFechas");
+    grid.innerHTML = "";
+
+    for(let i = 0; i < primerDia; i++){
+        let vacio = document.createElement("div");
+        vacio.classList.add("dia","vacio");
+        grid.appendChild(vacio);
+    }
+
+    for(let dia = 1; dia <= diasEnMes; dia++){
+
+        let celda = document.createElement("div");
+        celda.classList.add("dia");
+        celda.textContent = dia;
+
+        if(dia === hoy.getDate() && mes === hoy.getMonth() && anio === hoy.getFullYear()){
+            celda.classList.add("hoy");
+        }
+
+        grid.appendChild(celda);
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

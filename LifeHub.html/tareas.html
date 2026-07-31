@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeHub - Mis tareas</title>
+<!--PAGINA_TAREAS-->
+
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",sans-serif;
+}
+
+body{
+    background:#eef2ff;
+    display:flex;
+    min-height:100vh;
+    transition:.3s;
+}
+
+.menu{
+    width:250px;
+    height:100vh;
+    background:#4F46E5;
+    padding:25px;
+    color:white;
+    position:fixed;
+}
+
+.menu h1{
+    margin-bottom:40px;
+    font-size:28px;
+}
+
+.menu a{
+    display:block;
+    color:white;
+    text-decoration:none;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:10px;
+    transition:.3s;
+}
+
+.menu a:hover{
+    background:white;
+    color:#4F46E5;
+}
+
+.menu a.activo{
+    background:white;
+    color:#4F46E5;
+    font-weight:bold;
+}
+
+.contenido{
+    margin-left:270px;
+    padding:40px;
+    width:100%;
+}
+
+.tarjeta{
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,.1);
+    max-width:600px;
+}
+
+h2{
+    margin-bottom:20px;
+}
+
+.fila-entrada{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:10px;
+}
+
+input{
+    flex:1;
+    min-width:200px;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:15px;
+}
+
+select{
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:15px;
+}
+
+button{
+    padding:12px 20px;
+    background:#4F46E5;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:15px;
+    transition:.2s;
+}
+
+button:hover{
+    background:#372fd3;
+}
+
+ul{
+    list-style:none;
+    margin-top:20px;
+}
+
+li{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#f8f8f8;
+    padding:15px;
+    margin-bottom:10px;
+    border-radius:10px;
+    gap:10px;
+}
+
+li .info{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex:1;
+}
+
+.etiqueta{
+    font-size:12px;
+    font-weight:bold;
+    padding:4px 10px;
+    border-radius:20px;
+    color:white;
+    white-space:nowrap;
+}
+
+.etiqueta.Alta{ background:#EF4444; }
+.etiqueta.Media{ background:#F59E0B; }
+.etiqueta.Baja{ background:#10B981; }
+
+.acciones{
+    display:flex;
+    gap:8px;
+}
+
+.editar{
+    background:#F59E0B;
+}
+.editar:hover{
+    background:#d97f06;
+}
+
+.eliminar{
+    background:#EF4444;
+}
+.eliminar:hover{
+    background:#dc2626;
+}
+
+.vacio{
+    text-align:center;
+    color:#888;
+    padding:20px 0;
+}
+
+/* ==========================
+   MODO OSCURO
+========================== */
+
+body.modoOscuro{
+    background:#121212;
+    color:white;
+}
+
+body.modoOscuro .tarjeta{
+    background:#1E1E1E;
+    color:white;
+}
+
+body.modoOscuro li{
+    background:#2A2A2A;
+    color:white;
+}
+
+body.modoOscuro input,
+body.modoOscuro select{
+    background:#2A2A2A;
+    color:white;
+    border:1px solid #555;
+}
+
+body.modoOscuro .menu{
+    background:#181818;
+}
+
+body.modoOscuro .vacio{
+    color:#aaa;
+}
+
+#botonModo{
+    margin-bottom:20px;
+    background:#374151;
+}
+
+#botonModo:hover{
+    transform:scale(1.03);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="menu">
+
+    <h1>🌟 LifeHub</h1>
+
+    <a href="index.html">🏠 Inicio</a>
+    <a href="tareas.html" class="activo">✅ Mis tareas</a>
+    <a href="calendario.html">📅 Calendario</a>
+    <a href="notas.html">📝 Notas</a>
+    <a href="metas.html">🎯 Metas</a>
+    <a href="configuracion.html">⚙ Configuración</a>
+
+</div>
+
+<div class="contenido">
+
+    <div class="tarjeta">
+
+        <h2>Mis tareas</h2>
+
+        <button id="botonModo" onclick="cambiarModo()">🌙 Modo oscuro</button>
+
+        <div class="fila-entrada">
+
+            <input type="text" id="nuevaTarea" placeholder="Escribe una tarea">
+
+            <select id="prioridad">
+                <option value="Alta">🔴 Alta</option>
+                <option value="Media" selected>🟡 Media</option>
+                <option value="Baja">🟢 Baja</option>
+            </select>
+
+            <button onclick="agregarTarea()">Agregar</button>
+
+        </div>
+
+        <ul id="listaTareas"></ul>
+
+    </div>
+
+</div>
+
+<script>
+
+// ===============================
+// Cargar todo al abrir la página
+// ===============================
+window.addEventListener("load", function(){
+
+    // Recordar modo claro/oscuro
+    let modo = localStorage.getItem("modo");
+    if(modo === "oscuro"){
+        document.body.classList.add("modoOscuro");
+        document.getElementById("botonModo").innerHTML = "☀️ Modo claro";
+    }
+
+    // Permitir agregar con la tecla Enter
+    document.getElementById("nuevaTarea").addEventListener("keypress", function(e){
+        if(e.key === "Enter"){
+            agregarTarea();
+        }
+    });
+
+    cargarTareas();
+
+});
+
+// ===============================
+// Cambiar entre modo claro y oscuro
+// ===============================
+function cambiarModo(){
+
+    document.body.classList.toggle("modoOscuro");
+
+    if(document.body.classList.contains("modoOscuro")){
+        localStorage.setItem("modo","oscuro");
+        document.getElementById("botonModo").innerHTML = "☀️ Modo claro";
+    }else{
+        localStorage.setItem("modo","claro");
+        document.getElementById("botonModo").innerHTML = "🌙 Modo oscuro";
+    }
+
+}
+
+// ===============================
+// Obtener tareas guardadas
+// ===============================
+function obtenerTareas(){
+
+    let datos = JSON.parse(localStorage.getItem("tareas")) || [];
+
+    // Compatibilidad con datos antiguos guardados como texto simple
+    let normalizadas = datos.map(function(item){
+        if(typeof item === "string"){
+            return { texto: item, prioridad: "Media" };
+        }
+        return {
+            texto: item.texto || "",
+            prioridad: item.prioridad || "Media"
+        };
+    });
+
+    return normalizadas;
+
+}
+
+// ===============================
+// Guardar tareas
+// ===============================
+function guardarTareas(tareas){
+    localStorage.setItem("tareas", JSON.stringify(tareas));
+}
+
+// ===============================
+// Agregar una nueva tarea
+// ===============================
+function agregarTarea(){
+
+    let campoTexto = document.getElementById("nuevaTarea");
+    let texto = campoTexto.value.trim();
+    let prioridad = document.getElementById("prioridad").value;
+
+    if(texto === ""){
+        alert("Escribe una tarea");
+        return;
+    }
+
+    let tareas = obtenerTareas();
+
+    tareas.push({ texto: texto, prioridad: prioridad });
+
+    guardarTareas(tareas);
+
+    campoTexto.value = "";
+    campoTexto.focus();
+
+    cargarTareas();
+
+}
+
+// ===============================
+// Editar tarea
+// ===============================
+function editarTarea(indice){
+
+    let tareas = obtenerTareas();
+
+    let nuevoTexto = prompt("Editar tarea:", tareas[indice].texto);
+
+    if(nuevoTexto === null){
+        return;
+    }
+
+    nuevoTexto = nuevoTexto.trim();
+
+    if(nuevoTexto === ""){
+        alert("La tarea no puede quedar vacía.");
+        return;
+    }
+
+    tareas[indice].texto = nuevoTexto;
+
+    guardarTareas(tareas);
+
+    cargarTareas();
+
+}
+
+// ===============================
+// Eliminar tarea
+// ===============================
+function eliminarTarea(indice){
+
+    let tareas = obtenerTareas();
+
+    tareas.splice(indice, 1);
+
+    guardarTareas(tareas);
+
+    cargarTareas();
+
+}
+
+// ===============================
+// Mostrar todas las tareas en pantalla
+// ===============================
+function cargarTareas(){
+
+    let lista = document.getElementById("listaTareas");
+    lista.innerHTML = "";
+
+    let tareas = obtenerTareas();
+
+    if(tareas.length === 0){
+        lista.innerHTML = '<p class="vacio">No tienes tareas todavía 🎉</p>';
+        return;
+    }
+
+    tareas.forEach(function(tarea, indice){
+
+        let elemento = document.createElement("li");
+
+        elemento.innerHTML = `
+            <div class="info">
+                <span class="etiqueta ${tarea.prioridad}">${tarea.prioridad}</span>
+                <span>${tarea.texto}</span>
+            </div>
+            <div class="acciones">
+                <button class="editar" onclick="editarTarea(${indice})">✏ Editar</button>
+                <button class="eliminar" onclick="eliminarTarea(${indice})">🗑 Eliminar</button>
+            </div>
+        `;
+
+        lista.appendChild(elemento);
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>
